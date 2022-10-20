@@ -1,9 +1,6 @@
 package me.grenadinio.easytasks;
 
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -27,32 +24,36 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event){
-        if(event.getBlock().getType() == Material.DIRT || event.getBlock().getType() == Material.GRASS){
-            Location l = event.getBlock().getLocation();
-            Zombie z = (Zombie) event.getBlock().getWorld().spawnEntity(l.add(0,1,0), EntityType.ZOMBIE);
-            EntityEquipment equipment = z.getEquipment();
+        if(event.getBlock().getType() == Material.DIRT || event.getBlock().getType() == Material.GRASS) {
+            Bukkit.getScheduler().runTaskLater((Main.getPlugin()), new Runnable() {
+            public void run() {
+                Location l = event.getBlock().getLocation();
+                Zombie z = (Zombie) event.getBlock().getWorld().spawnEntity(l.add(0, 1, 0), EntityType.ZOMBIE);
+                EntityEquipment equipment = z.getEquipment();
 
-            ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
-            ItemStack pants = new ItemStack(Material.LEATHER_LEGGINGS);
-            ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
-            ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
+                ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
+                ItemStack pants = new ItemStack(Material.LEATHER_LEGGINGS);
+                ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
+                ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
 
-            LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) helmet.getItemMeta();
+                LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) helmet.getItemMeta();
 
-            leatherArmorMeta.setColor(Color.YELLOW);
+                leatherArmorMeta.setColor(Color.YELLOW);
 
-            helmet.setItemMeta(leatherArmorMeta);
-            chestplate.setItemMeta(leatherArmorMeta);
-            pants.setItemMeta(leatherArmorMeta);
-            boots.setItemMeta(leatherArmorMeta);
+                helmet.setItemMeta(leatherArmorMeta);
+                chestplate.setItemMeta(leatherArmorMeta);
+                pants.setItemMeta(leatherArmorMeta);
+                boots.setItemMeta(leatherArmorMeta);
 
-            equipment.setHelmet(helmet);
-            equipment.setChestplate(chestplate);
-            equipment.setLeggings(pants);
-            equipment.setBoots(boots);
+                equipment.setHelmet(helmet);
+                equipment.setChestplate(chestplate);
+                equipment.setLeggings(pants);
+                equipment.setBoots(boots);
 
 
-            z.setCustomName("§eZombie");
+                z.setCustomName("§eZombie");
+            }
+        }, 100L);
         }
     }
 }
