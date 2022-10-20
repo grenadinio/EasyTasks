@@ -50,6 +50,9 @@ public class EventListener implements Listener {
             equipment.setChestplate(chestplate);
             equipment.setLeggings(pants);
             equipment.setBoots(boots);
+
+
+            z.setCustomName("§eZombie");
         }
     }
 }
