@@ -25,8 +25,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event){
         if(event.getBlock().getType() == Material.DIRT || event.getBlock().getType() == Material.GRASS) {
-            Bukkit.getScheduler().runTaskLater((Main.getPlugin()), new Runnable() {
-            public void run() {
+            Bukkit.getScheduler().runTaskLater((Main.getPlugin()), () -> {
                 Location l = event.getBlock().getLocation();
                 Zombie z = (Zombie) event.getBlock().getWorld().spawnEntity(l.add(0, 1, 0), EntityType.ZOMBIE);
                 EntityEquipment equipment = z.getEquipment();
@@ -50,10 +49,8 @@ public class EventListener implements Listener {
                 equipment.setLeggings(pants);
                 equipment.setBoots(boots);
 
-
-                z.setCustomName("§eZombie");
-            }
-        }, 100L);
+                z.setCustomName(ChatColor.YELLOW + "Zombie");
+            }, 100L);
         }
     }
 }
