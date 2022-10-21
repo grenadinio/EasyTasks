@@ -1,5 +1,6 @@
 package me.grenadinio.easytasks;
 
+import org.bson.Document;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -8,7 +9,9 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -23,6 +26,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+
 public class EventListener implements Listener {
     private static final NamespacedKey zombie_key = new NamespacedKey(Main.getPlugin(), "zombie_key");
     private static final DecimalFormat damage_format = new DecimalFormat("#.##");
@@ -35,6 +41,19 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+
+        Location location = event.getBlock().getLocation();
+
+        Document result = MongoConnect.execute((collection -> collection.find(and(
+                eq("x", location.getBlockX()),
+                eq("y", location.getBlockY()),
+                eq("z", location.getBlockZ())
+        )).first()));
+
+        if (result == null) {
+            event.setCancelled(true);
+        }
+
         if (event.getBlock().getType() == Material.DIRT || event.getBlock().getType() == Material.GRASS) {
             AtomicInteger seconds = new AtomicInteger(5);
 
@@ -131,7 +150,7 @@ public class EventListener implements Listener {
             double damage = event.getFinalDamage();
             String rounded_damage = damage_format.format(damage);
             LivingEntity entity = (LivingEntity) event.getEntity();
-            String entiry_health = damage_format.format(entity.getHealth() - damage);
+            String entiry_health = damage_format.format(Math.max(entity.getHealth() - damage, 0));
             event.getDamager().sendMessage("Нанесено " + rounded_damage + " урона. У моба осталось " + entiry_health + " хп.");
         }
         if (Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "right_zombie")) {
@@ -144,4 +163,32 @@ public class EventListener implements Listener {
             player.addPotionEffect(list.get(0));
         }
     }
+
+    @EventHandler
+    public void onEntityDeath(EntityDeathEvent event) {
+        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "left_zombie")
+                || Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "right_zombie")) {
+            event.getDrops().clear();
+            event.getDrops().add(new ItemStack(Material.DIRT, 1));
+        }
+    }
+
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        Location location = event.getBlock().getLocation();
+        String material = event.getBlock().getType().toString();
+
+        MongoConnect.execute((collection) -> {
+            collection.insertOne(new Document()
+                    .append("uuid", uuid.toString())
+                    .append("type", material)
+                    .append("x", location.getBlockX())
+                    .append("y", location.getBlockY())
+                    .append("z", location.getBlockZ()));
+            return null;
+        });
+    }
+
 }
