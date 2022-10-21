@@ -44,34 +44,36 @@ public class EventListener implements Listener {
             t.scheduleAtFixedRate(tt, 0L, TimeUnit.SECONDS.toMillis(1));
 
             Bukkit.getScheduler().scheduleSyncDelayedTask((Main.getPlugin()), () -> {
-                
+
                 Location player_loc = event.getPlayer().getLocation();
                 Vector direction = event.getPlayer().getLocation().getDirection();
                 Location block_loc = player_loc.add(direction.multiply(2));
 
+                Location loc_zombie_left = block_loc.clone().add(-1,0,0);
+                Location loc_zombie_right = block_loc.clone().add(1,0,0);
 
-                boolean block = block_loc.getBlock().getType() == Material.AIR;
-                boolean block_under = block_loc.clone().add(0,-1,0).getBlock().getType() != Material.AIR;
-                boolean block_above = block_loc.clone().add(0,1,0).getBlock().getType() == Material.AIR;
 
-                if(block_under && block && block_above) {
+                //Leather armour
+                ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
+                ItemStack pants = new ItemStack(Material.LEATHER_LEGGINGS);
+                ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
+                ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
 
-                    Zombie z = (Zombie) event.getPlayer().getWorld().spawnEntity(block_loc, EntityType.ZOMBIE);
+                //Yellow colored leather armour
+                LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) helmet.getItemMeta();
+                leatherArmorMeta.setColor(Color.YELLOW);
+                helmet.setItemMeta(leatherArmorMeta);
+                chestplate.setItemMeta(leatherArmorMeta);
+                pants.setItemMeta(leatherArmorMeta);
+                boots.setItemMeta(leatherArmorMeta);
+
+                //Check location for left zombie
+                if(loc_zombie_left.clone().add(0,-1,0).getBlock().getType() != Material.AIR
+                        && loc_zombie_left.getBlock().getType() == Material.AIR
+                        && loc_zombie_left.clone().add(0,1,0).getBlock().getType() == Material.AIR) {
+
+                    Zombie z = (Zombie) event.getPlayer().getWorld().spawnEntity(loc_zombie_left, EntityType.ZOMBIE);
                     EntityEquipment equipment = z.getEquipment();
-
-                    ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
-                    ItemStack pants = new ItemStack(Material.LEATHER_LEGGINGS);
-                    ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
-                    ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
-
-                    LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) helmet.getItemMeta();
-
-                    leatherArmorMeta.setColor(Color.YELLOW);
-
-                    helmet.setItemMeta(leatherArmorMeta);
-                    chestplate.setItemMeta(leatherArmorMeta);
-                    pants.setItemMeta(leatherArmorMeta);
-                    boots.setItemMeta(leatherArmorMeta);
 
                     equipment.setHelmet(helmet);
                     equipment.setChestplate(chestplate);
@@ -81,7 +83,26 @@ public class EventListener implements Listener {
                     z.setCustomName(ChatColor.YELLOW + "Zombie");
                 }
                 else{
-                    event.getPlayer().sendMessage("Зомби нет, ищи нового");
+                    event.getPlayer().sendMessage("Слева не получилось");
+                }
+
+                //Check location for right zombie
+                if(loc_zombie_right.clone().add(0,-1,0).getBlock().getType() != Material.AIR
+                        && loc_zombie_right.getBlock().getType() == Material.AIR
+                        && loc_zombie_right.clone().add(0,1,0).getBlock().getType() == Material.AIR) {
+
+                    Zombie z = (Zombie) event.getPlayer().getWorld().spawnEntity(loc_zombie_right, EntityType.ZOMBIE);
+                    EntityEquipment equipment = z.getEquipment();
+
+                    equipment.setHelmet(helmet);
+                    equipment.setChestplate(chestplate);
+                    equipment.setLeggings(pants);
+                    equipment.setBoots(boots);
+
+                    z.setCustomName(ChatColor.YELLOW + "Zombie");
+                }
+                else{
+                    event.getPlayer().sendMessage("Справа не получилось");
                 }
             }, 100);
         }
