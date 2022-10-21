@@ -43,8 +43,10 @@ public class EventListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
 
         Location location = event.getBlock().getLocation();
+        UUID uuid = event.getPlayer().getUniqueId();
 
         Document result = MongoConnect.execute((collection -> collection.find(and(
+                eq("uuid", uuid.toString()),
                 eq("x", location.getBlockX()),
                 eq("y", location.getBlockY()),
                 eq("z", location.getBlockZ())
@@ -52,6 +54,7 @@ public class EventListener implements Listener {
 
         if (result == null) {
             event.setCancelled(true);
+            return;
         }
 
         if (event.getBlock().getType() == Material.DIRT || event.getBlock().getType() == Material.GRASS) {
