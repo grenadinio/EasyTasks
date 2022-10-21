@@ -14,17 +14,17 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.text.DecimalFormat;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class EventListener implements Listener {
-    private static final NamespacedKey zombie_1_key = new NamespacedKey(Main.getPlugin(), "zombie_1_key");
+    private static final NamespacedKey zombie_key = new NamespacedKey(Main.getPlugin(), "zombie_key");
     private static final DecimalFormat damage_format = new DecimalFormat("#.##");
 
     @EventHandler
@@ -94,7 +94,7 @@ public class EventListener implements Listener {
 
                     z.setCustomName(ChatColor.YELLOW + "Zombie");
 
-                    z.getPersistentDataContainer().set(zombie_1_key, PersistentDataType.STRING, "mark");
+                    z.getPersistentDataContainer().set(zombie_key, PersistentDataType.STRING, "left_zombie");
                 } else {
                     event.getPlayer().sendMessage("Слева не получилось");
                 }
@@ -114,6 +114,8 @@ public class EventListener implements Listener {
                         equipment.setBoots(boots);
                     }
                     z.setCustomName(ChatColor.YELLOW + "Zombie");
+
+                    z.getPersistentDataContainer().set(zombie_key, PersistentDataType.STRING, "right_zombie");
                 } else {
                     event.getPlayer().sendMessage("Справа не получилось");
                 }
@@ -125,12 +127,21 @@ public class EventListener implements Listener {
     public void onHurt(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player)) return;
         if (!(event.getEntity() instanceof LivingEntity)) return;
-        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_1_key, PersistentDataType.STRING), "mark")) {
+        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "left_zombie")) {
             double damage = event.getFinalDamage();
             String rounded_damage = damage_format.format(damage);
             LivingEntity entity = (LivingEntity) event.getEntity();
             String entiry_health = damage_format.format(entity.getHealth() - damage);
             event.getDamager().sendMessage("Нанесено " + rounded_damage + " урона. У моба осталось " + entiry_health + " хп.");
+        }
+        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "right_zombie")) {
+            Player player = (Player) event.getDamager();
+            List<PotionEffect> list = new ArrayList<>();
+            list.add(PotionEffectType.LEVITATION.createEffect(10 * 20, 1));
+            list.add(PotionEffectType.SLOW.createEffect(10 * 20, 1));
+            list.add(PotionEffectType.BLINDNESS.createEffect(10 * 20, 1));
+            Collections.shuffle(list);
+            player.addPotionEffect(list.get(0));
         }
     }
 }
