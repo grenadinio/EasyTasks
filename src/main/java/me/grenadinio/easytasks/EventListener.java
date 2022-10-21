@@ -46,7 +46,6 @@ public class EventListener implements Listener {
 
         Location location = event.getBlock().getLocation();
         UUID uuid = event.getPlayer().getUniqueId();
-        Material material = event.getBlock().getType();
 
         Document result = MongoConnect.execute((collection -> collection.find(and(
                 eq("uuid", uuid.toString()),
@@ -149,7 +148,7 @@ public class EventListener implements Listener {
 
         event.setDropItems(false);
         if (event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
-            event.getBlock().getWorld().dropItemNaturally(location, addItemMeta(new ItemStack(material, 1)));
+            event.getBlock().getWorld().dropItemNaturally(location, addItemMeta(new ItemStack(Material.MYCELIUM, 1)));
         }
     }
 
