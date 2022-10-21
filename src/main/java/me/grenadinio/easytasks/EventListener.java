@@ -15,7 +15,9 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -44,6 +46,7 @@ public class EventListener implements Listener {
 
         Location location = event.getBlock().getLocation();
         UUID uuid = event.getPlayer().getUniqueId();
+        Material material = event.getBlock().getType();
 
         Document result = MongoConnect.execute((collection -> collection.find(and(
                 eq("uuid", uuid.toString()),
@@ -143,6 +146,11 @@ public class EventListener implements Listener {
                 }
             }, 100);
         }
+
+        event.setDropItems(false);
+        if (event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
+            event.getBlock().getWorld().dropItemNaturally(location, addItemMeta(new ItemStack(material, 1)));
+        }
     }
 
     @EventHandler
@@ -172,16 +180,28 @@ public class EventListener implements Listener {
         if (Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "left_zombie")
                 || Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "right_zombie")) {
             event.getDrops().clear();
-            event.getDrops().add(new ItemStack(Material.DIRT, 1));
+
+            event.getDrops().add(addItemMeta(new ItemStack(Material.DIRT, 1)));
         }
     }
-
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         Location location = event.getBlock().getLocation();
         String material = event.getBlock().getType().toString();
+
+
+        ItemStack stack = event.getPlayer().getInventory().getItemInMainHand();
+        ItemMeta meta = Objects.requireNonNull(stack.getItemMeta());
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+
+        boolean hasMarker = Objects.equals(container.get(zombie_key, PersistentDataType.STRING), "dropped_item");
+
+        if (!hasMarker) {
+            event.setCancelled(true);
+            return;
+        }
 
         MongoConnect.execute((collection) -> {
             collection.insertOne(new Document()
@@ -192,6 +212,16 @@ public class EventListener implements Listener {
                     .append("z", location.getBlockZ()));
             return null;
         });
+    }
+
+
+    private ItemStack addItemMeta(ItemStack stack) {
+        ItemMeta meta = Objects.requireNonNull(stack.getItemMeta());
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        container.set(zombie_key, PersistentDataType.STRING, "dropped_item");
+        stack.setItemMeta(meta);
+
+        return stack;
     }
 
 }
