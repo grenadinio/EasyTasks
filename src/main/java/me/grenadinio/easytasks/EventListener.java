@@ -77,12 +77,12 @@ public class EventListener implements Listener {
 
             Bukkit.getScheduler().scheduleSyncDelayedTask((Main.getPlugin()), () -> {
 
-                Location player_loc = event.getPlayer().getLocation();
+                Location playerLoc = event.getPlayer().getLocation();
                 Vector direction = event.getPlayer().getLocation().getDirection();
-                Location block_loc = player_loc.add(direction.multiply(2));
+                Location blockLoc = playerLoc.add(direction.multiply(2));
 
-                Location loc_zombie_left = block_loc.clone().add(-1, 0, 0);
-                Location loc_zombie_right = block_loc.clone().add(1, 0, 0);
+                Location locZombieLeft = blockLoc.clone().add(-1, 0, 0);
+                Location locZombieRight = blockLoc.clone().add(1, 0, 0);
 
 
                 //Leather armour
@@ -102,11 +102,11 @@ public class EventListener implements Listener {
                 boots.setItemMeta(leatherArmorMeta);
 
                 //Check location for left zombie
-                if (loc_zombie_left.clone().add(0, -1, 0).getBlock().getType() != Material.AIR
-                        && loc_zombie_left.getBlock().getType() == Material.AIR
-                        && loc_zombie_left.clone().add(0, 1, 0).getBlock().getType() == Material.AIR) {
+                if (locZombieLeft.clone().add(0, -1, 0).getBlock().getType() != Material.AIR
+                        && locZombieLeft.getBlock().getType() == Material.AIR
+                        && locZombieLeft.clone().add(0, 1, 0).getBlock().getType() == Material.AIR) {
 
-                    Zombie z = (Zombie) event.getPlayer().getWorld().spawnEntity(loc_zombie_left, EntityType.ZOMBIE);
+                    Zombie z = (Zombie) event.getPlayer().getWorld().spawnEntity(locZombieLeft, EntityType.ZOMBIE);
                     EntityEquipment equipment = z.getEquipment();
 
                     if (equipment != null) {
@@ -124,11 +124,11 @@ public class EventListener implements Listener {
                 }
 
                 //Check location for right zombie
-                if (loc_zombie_right.clone().add(0, -1, 0).getBlock().getType() != Material.AIR
-                        && loc_zombie_right.getBlock().getType() == Material.AIR
-                        && loc_zombie_right.clone().add(0, 1, 0).getBlock().getType() == Material.AIR) {
+                if (locZombieRight.clone().add(0, -1, 0).getBlock().getType() != Material.AIR
+                        && locZombieRight.getBlock().getType() == Material.AIR
+                        && locZombieRight.clone().add(0, 1, 0).getBlock().getType() == Material.AIR) {
 
-                    Zombie z = (Zombie) event.getPlayer().getWorld().spawnEntity(loc_zombie_right, EntityType.ZOMBIE);
+                    Zombie z = (Zombie) event.getPlayer().getWorld().spawnEntity(locZombieRight, EntityType.ZOMBIE);
                     EntityEquipment equipment = z.getEquipment();
 
                     if (equipment != null) {
@@ -160,8 +160,8 @@ public class EventListener implements Listener {
             double damage = event.getFinalDamage();
             String rounded_damage = damage_format.format(damage);
             LivingEntity entity = (LivingEntity) event.getEntity();
-            String entiry_health = damage_format.format(Math.max(entity.getHealth() - damage, 0));
-            event.getDamager().sendMessage("Нанесено " + rounded_damage + " урона. У моба осталось " + entiry_health + " хп.");
+            String entityHealth = damage_format.format(Math.max(entity.getHealth() - damage, 0));
+            event.getDamager().sendMessage("Нанесено " + rounded_damage + " урона. У моба осталось " + entityHealth + " хп.");
         }
         if (Objects.equals(event.getEntity().getPersistentDataContainer().get(zombie_key, PersistentDataType.STRING), "right_zombie")) {
             Player player = (Player) event.getDamager();
