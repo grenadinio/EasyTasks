@@ -85,21 +85,11 @@ public class EventListener implements Listener {
                 Location locZombieRight = blockLoc.clone().add(1, 0, 0);
 
 
-                //Leather armour
-                ItemStack boots = new ItemStack(Material.LEATHER_BOOTS);
-                ItemStack pants = new ItemStack(Material.LEATHER_LEGGINGS);
-                ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
-                ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
-
-                //Yellow colored leather armour
-                LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) helmet.getItemMeta();
-                if (leatherArmorMeta != null) {
-                    leatherArmorMeta.setColor(Color.YELLOW);
-                }
-                helmet.setItemMeta(leatherArmorMeta);
-                chestplate.setItemMeta(leatherArmorMeta);
-                pants.setItemMeta(leatherArmorMeta);
-                boots.setItemMeta(leatherArmorMeta);
+                //Leather yellow colored armour
+                ItemStack boots = addLeatherArmourColor(Material.LEATHER_BOOTS, Color.YELLOW);
+                ItemStack pants = addLeatherArmourColor(Material.LEATHER_LEGGINGS, Color.YELLOW);
+                ItemStack chestplate = addLeatherArmourColor(Material.LEATHER_CHESTPLATE, Color.YELLOW);
+                ItemStack helmet = addLeatherArmourColor(Material.LEATHER_HELMET, Color.YELLOW);
 
                 //Check location for left zombie
                 if (locZombieLeft.clone().add(0, -1, 0).getBlock().getType() != Material.AIR
@@ -221,6 +211,15 @@ public class EventListener implements Listener {
         stack.setItemMeta(meta);
 
         return stack;
+    }
+
+    private ItemStack addLeatherArmourColor(Material material, Color color) {
+        ItemStack itemStack = new ItemStack(material);
+        LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) itemStack.getItemMeta();
+        if (leatherArmorMeta != null) leatherArmorMeta.setColor(color);
+        itemStack.setItemMeta(leatherArmorMeta);
+
+        return itemStack;
     }
 
 }
