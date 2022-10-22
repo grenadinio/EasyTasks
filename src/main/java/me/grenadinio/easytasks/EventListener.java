@@ -32,6 +32,12 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
 public class EventListener implements Listener {
+    private final Main plugin;
+
+    public EventListener(Main plugin) {
+        this.plugin = plugin;
+    }
+
     private static final NamespacedKey zombie_key = new NamespacedKey(Main.getPlugin(), "zombie_key");
     private static final DecimalFormat damage_format = new DecimalFormat("#.##");
 
@@ -75,7 +81,7 @@ public class EventListener implements Listener {
             };
             t.scheduleAtFixedRate(tt, 0L, TimeUnit.SECONDS.toMillis(1));
 
-            Bukkit.getScheduler().scheduleSyncDelayedTask((Main.getPlugin()), () -> {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
 
                 Location playerLoc = event.getPlayer().getLocation();
                 Vector direction = event.getPlayer().getLocation().getDirection();

@@ -13,7 +13,8 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
-        getServer().getPluginManager().registerEvents(new EventListener(), this);
+        EventListener eventListener = new EventListener(this);
+        getServer().getPluginManager().registerEvents(eventListener, this);
     }
 
     @Override
