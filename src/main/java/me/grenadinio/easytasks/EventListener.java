@@ -38,7 +38,6 @@ public class EventListener implements Listener {
         this.plugin = plugin;
     }
 
-    private static final NamespacedKey ZOMBIE_KEY = new NamespacedKey(Main.getPlugin(), "zombie_key");
     private static final DecimalFormat DAMAGE_FORMAT = new DecimalFormat("#.##");
 
     @EventHandler
@@ -114,7 +113,7 @@ public class EventListener implements Listener {
 
                     z.setCustomName(ChatColor.YELLOW + "Zombie");
 
-                    z.getPersistentDataContainer().set(ZOMBIE_KEY, PersistentDataType.STRING, "left_zombie");
+                    z.getPersistentDataContainer().set(plugin.ZOMBIE_KEY, PersistentDataType.STRING, "left_zombie");
                 } else {
                     event.getPlayer().sendMessage("Слева не получилось");
                 }
@@ -135,7 +134,7 @@ public class EventListener implements Listener {
                     }
                     z.setCustomName(ChatColor.YELLOW + "Zombie");
 
-                    z.getPersistentDataContainer().set(ZOMBIE_KEY, PersistentDataType.STRING, "right_zombie");
+                    z.getPersistentDataContainer().set(plugin.ZOMBIE_KEY, PersistentDataType.STRING, "right_zombie");
                 } else {
                     event.getPlayer().sendMessage("Справа не получилось");
                 }
@@ -152,14 +151,14 @@ public class EventListener implements Listener {
     public void onHurt(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player)) return;
         if (!(event.getEntity() instanceof LivingEntity)) return;
-        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(ZOMBIE_KEY, PersistentDataType.STRING), "left_zombie")) {
+        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(plugin.ZOMBIE_KEY, PersistentDataType.STRING), "left_zombie")) {
             double damage = event.getFinalDamage();
             String roundedDamage = DAMAGE_FORMAT.format(damage);
             LivingEntity entity = (LivingEntity) event.getEntity();
             String entityHealth = DAMAGE_FORMAT.format(Math.max(entity.getHealth() - damage, 0));
             event.getDamager().sendMessage(String.format("Нанесено %s урона. У моба осталось %s хп.", roundedDamage, entityHealth));
         }
-        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(ZOMBIE_KEY, PersistentDataType.STRING), "right_zombie")) {
+        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(plugin.ZOMBIE_KEY, PersistentDataType.STRING), "right_zombie")) {
             Player player = (Player) event.getDamager();
             List<PotionEffect> list = new ArrayList<>();
             list.add(PotionEffectType.LEVITATION.createEffect(10 * 20, 1));
@@ -172,8 +171,8 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(ZOMBIE_KEY, PersistentDataType.STRING), "left_zombie")
-                || Objects.equals(event.getEntity().getPersistentDataContainer().get(ZOMBIE_KEY, PersistentDataType.STRING), "right_zombie")) {
+        if (Objects.equals(event.getEntity().getPersistentDataContainer().get(plugin.ZOMBIE_KEY, PersistentDataType.STRING), "left_zombie")
+                || Objects.equals(event.getEntity().getPersistentDataContainer().get(plugin.ZOMBIE_KEY, PersistentDataType.STRING), "right_zombie")) {
             event.getDrops().clear();
 
             event.getDrops().add(addItemMeta(new ItemStack(Material.DIRT, 1)));
@@ -191,7 +190,7 @@ public class EventListener implements Listener {
         ItemMeta meta = Objects.requireNonNull(stack.getItemMeta());
         PersistentDataContainer container = meta.getPersistentDataContainer();
 
-        boolean hasMarker = Objects.equals(container.get(ZOMBIE_KEY, PersistentDataType.STRING), "dropped_item");
+        boolean hasMarker = Objects.equals(container.get(plugin.ZOMBIE_KEY, PersistentDataType.STRING), "dropped_item");
 
         if (!hasMarker) {
             event.setCancelled(true);
@@ -213,7 +212,7 @@ public class EventListener implements Listener {
     private ItemStack addItemMeta(ItemStack stack) {
         ItemMeta meta = Objects.requireNonNull(stack.getItemMeta());
         PersistentDataContainer container = meta.getPersistentDataContainer();
-        container.set(ZOMBIE_KEY, PersistentDataType.STRING, "dropped_item");
+        container.set(plugin.ZOMBIE_KEY, PersistentDataType.STRING, "dropped_item");
         stack.setItemMeta(meta);
 
         return stack;
